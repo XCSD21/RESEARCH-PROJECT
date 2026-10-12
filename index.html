@@ -1,0 +1,521 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unlock the Output | Puzzle Challenge</title>
+
+<style>
+:root {
+  --ink: #243247;
+  --blue: #315b85;
+  --light: #edf4fb;
+  --gold: #f0bd58;
+  --white: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(145deg, #eaf2fb, #f8f5ee);
+  min-height: 100vh;
+}
+
+header {
+  text-align: center;
+  padding: 28px 16px 20px;
+  background: var(--blue);
+  color: white;
+  border-bottom: 5px solid var(--gold);
+}
+
+header .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 11px;
+  opacity: .85;
+}
+
+header h1 {
+  margin: 9px 0;
+  font-size: clamp(25px, 6vw, 38px);
+}
+
+header p {
+  margin: 0;
+  font-size: 14px;
+}
+
+main {
+  width: min(100% - 24px, 650px);
+  margin: 22px auto 40px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 8px 28px #233b5515;
+  border: 1px solid #dce5ef;
+}
+
+.stage-label {
+  display: inline-block;
+  padding: 6px 10px;
+  background: #e7eff9;
+  color: #315b85;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+h2 { margin: 13px 0 8px; }
+p { line-height: 1.55; }
+
+.progress {
+  height: 7px;
+  background: #e7edf4;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 17px 0;
+}
+
+.progress span {
+  display: block;
+  width: 50%;
+  height: 100%;
+  background: var(--gold);
+  transition: width .3s;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 15px 0;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.action {
+  border: 0;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--blue);
+  color: white;
+  font-weight: bold;
+}
+
+.action.secondary {
+  background: #e8eef5;
+  color: var(--ink);
+}
+
+.action:active { transform: scale(.98); }
+
+.status {
+  font-size: 14px;
+  min-height: 22px;
+  font-weight: bold;
+  color: var(--blue);
+}
+
+/* A4 portrait ratio: 210 / 297 */
+.puzzle {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 210 / 297;
+  overflow: hidden;
+  border: 3px solid white;
+  outline: 1px solid #cbd6e2;
+  border-radius: 5px;
+  background: #dbe4ee;
+  gap: 2px;
+  margin: 18px auto;
+  box-shadow: 0 5px 18px #20334a1c;
+}
+
+.puzzle.jigsaw {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+}
+
+.puzzle.sliding {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+
+.tile {
+  min-width: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 2px;
+  padding: 0;
+  background-repeat: no-repeat;
+  background-color: #dbe4ee;
+  position: relative;
+}
+
+.tile.selected {
+  outline: 4px solid var(--gold);
+  outline-offset: -4px;
+  z-index: 1;
+}
+
+.tile:focus-visible {
+  outline: 4px solid #e6a92d;
+  outline-offset: -4px;
+  z-index: 2;
+}
+
+.tile.empty {
+  background: #f1f4f8;
+  border: 2px dashed #a9bacd;
+}
+
+.reveal {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 2px dashed #d6e0eb;
+}
+
+.reveal img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 210 / 297;
+  object-fit: contain;
+  background: white;
+  border: 1px solid #d7e0e9;
+  box-shadow: 0 5px 18px #20334a18;
+}
+
+.reveal h3 { margin-bottom: 5px; }
+
+[hidden] { display: none !important; }
+
+footer {
+  text-align: center;
+  padding: 20px 12px;
+  color: #65758a;
+  font-size: 12px;
+}
+
+@media (max-width: 420px) {
+  .card { padding: 14px; }
+  .action { flex: 1 1 auto; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="eyebrow">Interactive School Project</div>
+  <h1>Unlock the Output</h1>
+  <p>Solve the puzzles. Reveal the pages.</p>
+</header>
+
+<main>
+  <div class="card">
+    <div class="stage-label" id="stageLabel">CHALLENGE 1 OF 2</div>
+    <h2 id="gameTitle">The Venn Diagram Jigsaw</h2>
+    <p id="gameDescription">
+      Tap two tiles to swap their places. Put all 25 pieces in the correct order to reveal Page 1.
+    </p>
+
+    <div class="progress">
+      <span id="progressBar"></span>
+    </div>
+
+    <!-- GAME 1 -->
+    <section id="game1">
+      <div class="actions">
+        <button class="action secondary" id="shuffleJigsaw">Shuffle again</button>
+      </div>
+
+      <div id="jigsawBoard" class="puzzle jigsaw"
+           aria-label="25-piece Venn diagram puzzle"></div>
+
+      <p class="status" id="jigsawStatus" aria-live="polite">
+        Tap any tile, then tap another tile to swap them.
+      </p>
+
+      <div id="page1Reveal" class="reveal" hidden>
+        <h3>Page 1 Unlocked!</h3>
+        <p>You completed the Venn diagram puzzle. Here's your first page.</p>
+        <img src="page1.jpg" alt="Completed Venn diagram page">
+
+        <div class="actions">
+          <button class="action" id="continueButton">
+            Continue to Page 2 →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAME 2 -->
+    <section id="game2" hidden>
+      <div class="actions">
+        <button class="action secondary" id="shuffleSliding">
+          Shuffle tiles
+        </button>
+      </div>
+
+      <div id="slidingBoard" class="puzzle sliding"
+           aria-label="16-position sliding puzzle"></div>
+
+      <p class="status" id="slidingStatus" aria-live="polite">
+        Tap a tile beside the empty space to slide it.
+      </p>
+
+      <div id="page2Reveal" class="reveal" hidden>
+        <h3>Page 2 Unlocked!</h3>
+        <p>You solved both challenges! Here's the second page with your examples and sources.</p>
+        <img src="page2.jpg" alt="Examples and sources page">
+
+        <div class="actions">
+          <button class="action secondary" id="restartButton">
+            Play Again ↻
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  Made for a school project · Complete both challenges to reveal the output
+</footer>
+
+<script>
+const PAGE1 = "page1.jpg";
+const PAGE2 = "page2.jpg";
+
+const jigsawBoard = document.getElementById("jigsawBoard");
+const slidingBoard = document.getElementById("slidingBoard");
+const jigsawStatus = document.getElementById("jigsawStatus");
+const slidingStatus = document.getElementById("slidingStatus");
+const page1Reveal = document.getElementById("page1Reveal");
+const page2Reveal = document.getElementById("page2Reveal");
+
+let jigsaw = [];
+let selectedTile = null;
+let sliding = [];
+let locked1 = false;
+let locked2 = false;
+
+function solvedJigsaw() {
+  return jigsaw.every((value, index) => value === index);
+}
+
+function shuffleJigsaw() {
+  jigsaw = Array.from({length: 25}, (_, i) => i);
+  for (let i = jigsaw.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [jigsaw[i], jigsaw[j]] = [jigsaw[j], jigsaw[i]];
+  }
+
+  if (solvedJigsaw()) {
+    [jigsaw[0], jigsaw[1]] = [jigsaw[1], jigsaw[0]];
+  }
+
+  selectedTile = null;
+  locked1 = false;
+  page1Reveal.hidden = true;
+  jigsawStatus.textContent =
+    "Tap any tile, then tap another tile to swap them.";
+  renderJigsaw();
+}
+
+function renderJigsaw() {
+  jigsawBoard.innerHTML = "";
+
+  jigsaw.forEach((piece, position) => {
+    const button = document.createElement("button");
+    button.className = "tile";
+    button.type = "button";
+    button.setAttribute("aria-label", "Tile " + (piece + 1));
+
+    const row = Math.floor(piece / 5);
+    const col = piece % 5;
+
+    button.style.backgroundImage = `url("${PAGE1}")`;
+    button.style.backgroundSize = "500% 500%";
+    button.style.backgroundPosition =
+      `${col * 25}% ${row * 25}%`;
+
+    if (selectedTile === position) {
+      button.classList.add("selected");
+      button.setAttribute("aria-pressed", "true");
+    }
+
+    button.addEventListener("click", () => {
+      if (locked1) return;
+
+      if (selectedTile === null) {
+        selectedTile = position;
+      } else if (selectedTile === position) {
+        selectedTile = null;
+      } else {
+        [jigsaw[selectedTile], jigsaw[position]] =
+          [jigsaw[position], jigsaw[selectedTile]];
+        selectedTile = null;
+      }
+
+      if (solvedJigsaw()) {
+        locked1 = true;
+        jigsawStatus.textContent = "Perfect! Page 1 is unlocked.";
+        page1Reveal.hidden = false;
+      } else {
+        jigsawStatus.textContent = selectedTile === null
+          ? "Choose a tile to move."
+          : "Tile selected! Now tap the tile you want to swap with it.";
+      }
+
+      renderJigsaw();
+    });
+
+    jigsawBoard.appendChild(button);
+  });
+}
+
+/* Move to the second game only after Page 1 is unlocked. */
+document.getElementById("continueButton").addEventListener("click", () => {
+  document.getElementById("game1").hidden = true;
+  document.getElementById("game2").hidden = false;
+  document.getElementById("stageLabel").textContent = "CHALLENGE 2 OF 2";
+  document.getElementById("gameTitle").textContent = "The Sliding Challenge";
+  document.getElementById("gameDescription").textContent =
+    "Slide each tile into the correct position. The empty space lets you move nearby tiles.";
+  document.getElementById("progressBar").style.width = "100%";
+  shuffleSliding();
+  window.scrollTo({top: 0, behavior: "smooth"});
+});
+
+function solvedSliding() {
+  return sliding.every((value, index) =>
+    value === (index === 15 ? 0 : index + 1)
+  );
+}
+
+function shuffleSliding() {
+  sliding = Array.from({length: 15}, (_, i) => i + 1);
+  sliding.push(0);
+
+  let previousBlank = -1;
+
+  // Shuffle by legal moves so the puzzle always has a solution.
+  for (let move = 0; move < 180; move++) {
+    const blank = sliding.indexOf(0);
+    const options = [];
+
+    if (blank % 4 > 0) options.push(blank - 1);
+    if (blank % 4 < 3) options.push(blank + 1);
+    if (blank >= 4) options.push(blank - 4);
+    if (blank < 12) options.push(blank + 4);
+
+    const filtered = options.filter(pos => pos !== previousBlank);
+    const next = filtered[Math.floor(Math.random() * filtered.length)];
+
+    [sliding[blank], sliding[next]] = [sliding[next], sliding[blank]];
+    previousBlank = blank;
+  }
+
+  if (solvedSliding()) {
+    [sliding[14], sliding[15]] = [sliding[15], sliding[14]];
+  }
+
+  locked2 = false;
+  page2Reveal.hidden = true;
+  slidingStatus.textContent = "Tap a tile beside the empty space to slide it.";
+  renderSliding();
+}
+
+function renderSliding() {
+  slidingBoard.innerHTML = "";
+
+  sliding.forEach((piece, position) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "tile";
+
+    if (piece === 0) {
+      button.classList.add("empty");
+      button.setAttribute("aria-label", "Empty space");
+    } else {
+      const originalIndex = piece - 1;
+      const row = Math.floor(originalIndex / 4);
+      const col = originalIndex % 4;
+
+      button.style.backgroundImage = `url("${PAGE2}")`;
+      button.style.backgroundSize = "400% 400%";
+      button.style.backgroundPosition =
+        `${col * (100 / 3)}% ${row * (100 / 3)}%`;
+      button.setAttribute("aria-label", "Tile " + piece);
+    }
+
+    button.addEventListener("click", () => {
+      if (locked2 || piece === 0) return;
+
+      const blank = sliding.indexOf(0);
+      const sameRow = Math.floor(position / 4) === Math.floor(blank / 4);
+      const distance = Math.abs(position - blank);
+
+      if ((sameRow && distance === 1) || distance === 4) {
+        [sliding[position], sliding[blank]] =
+          [sliding[blank], sliding[position]];
+
+        if (solvedSliding()) {
+          locked2 = true;
+          slidingStatus.textContent = "Amazing! Page 2 is unlocked.";
+          page2Reveal.hidden = false;
+        } else {
+          slidingStatus.textContent = "Good move! Keep going.";
+        }
+
+        renderSliding();
+      } else {
+        slidingStatus.textContent =
+          "That tile can't move there. Choose one beside the empty space.";
+      }
+    });
+
+    slidingBoard.appendChild(button);
+  });
+}
+
+document.getElementById("shuffleJigsaw").addEventListener("click", shuffleJigsaw);
+document.getElementById("shuffleSliding").addEventListener("click", shuffleSliding);
+
+document.getElementById("restartButton").addEventListener("click", () => {
+  document.getElementById("game2").hidden = true;
+  document.getElementById("game1").hidden = false;
+  document.getElementById("stageLabel").textContent = "CHALLENGE 1 OF 2";
+  document.getElementById("gameTitle").textContent = "The Venn Diagram Jigsaw";
+  document.getElementById("gameDescription").textContent =
+    "Tap two tiles to swap their places. Put all 25 pieces in the correct order to reveal Page 1.";
+  document.getElementById("progressBar").style.width = "50%";
+  shuffleJigsaw();
+  window.scrollTo({top: 0, behavior: "smooth"});
+});
+
+/* Warn if either image filename is wrong. */
+[PAGE1, PAGE2].forEach((src) => {
+  const image = new Image();
+  image.onload = () => {};
+  image.onerror = () => console.warn("Image not found: " + src);
+  image.src = src;
+});
+
+shuffleJigsaw();
+</script>
+</body>
+</html>
