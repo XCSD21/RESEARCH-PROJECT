@@ -213,12 +213,24 @@ footer {
   .card { padding: 14px; }
   .action { flex: 1 1 auto; }
 }
+  
+.credits {
+  margin-top: 18px;
+  padding: 14px;
+  background: #edf4fb;
+  border-left: 4px solid #f0bd58;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.8;
+  font-weight: bold;
+}
+
 </style>
 </head>
 
 <body>
 <header>
-  <div class="eyebrow">Interactive School Project</div>
+  <div class="eyebrow">My Research School Project</div>
   <h1>Unlock the Output</h1>
   <p>Solve the puzzles. Reveal the pages.</p>
 </header>
@@ -250,7 +262,7 @@ footer {
 
       <div id="page1Reveal" class="reveal" hidden>
         <h3>Page 1 Unlocked!</h3>
-        <p>You completed the Venn diagram puzzle. Here's your first page.</p>
+        <p>You completed the Venn diagram puzzle. Here's the first page of the output.</p>
         <img src="page1.jpg" alt="Completed Venn diagram page">
 
         <div class="actions">
@@ -278,8 +290,13 @@ footer {
 
       <div id="page2Reveal" class="reveal" hidden>
         <h3>Page 2 Unlocked!</h3>
-        <p>You solved both challenges! Here's the second page with your examples and sources.</p>
+        <p>You solved both challenges! Here's the second page, the examples and sources.</p>
         <img src="page2.jpg" alt="Examples and sources page">
+        <p class="credits">
+          Created by: Kier Iver L. Alsada<br>
+          Grade & Section: 9 - Padolina
+        </p>
+
 
         <div class="actions">
           <button class="action secondary" id="restartButton">
